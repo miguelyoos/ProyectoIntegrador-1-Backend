@@ -5,7 +5,7 @@
 El proyecto está organizado en dos directorios principales:
 
 ### Backend
-Carpeta del backend con Express.js:
+Carpeta del backend con Django
 - `src/` - Código fuente del backend
   - `config/` - Archivos de configuración
   - `controllers/` - Controladores
