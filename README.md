@@ -6,12 +6,25 @@ El proyecto está organizado en dos directorios principales:
 
 ### Backend
 Carpeta del backend con Django
-- `src/` - Código fuente del backend
-  - `config/` - Archivos de configuración
-  - `controllers/` - Controladores
-  - `middleware/` - Middleware
-  - `models/` - Modelos de datos
-  - `routes/` - Rutas
+Backend/
+│
+├── api/                  # Aplicación principal (modelos, vistas, endpoints)
+│
+├── backend/              # Configuración principal del proyecto Django
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── manage.py             # Archivo para ejecutar comandos Django
+├── requirements.txt      # Dependencias del proyecto
+└── README.md             # Documentación del backend
+INSTALAR:
+pip install django
+pip install django-rest-framework
+pip install psycopg2
+pip install django-cors-headers
 
 ### Frontend
 Carpeta del frontend con React + TypeScript + Vite:
@@ -22,10 +35,10 @@ Carpeta del frontend con React + TypeScript + Vite:
 
 ## Instalación y Ejecución
 
-### Para usos de desarrollo inicial, es necesario activar una BD de postgres local en el equipo a correr y cambiar los datos de conexion en el archivo settings.py, en el apartado DATABASES
-
 ### Backend
 ```bash
+cd Backend
+python manage.py runserver
 ```
 
 ### Frontend
@@ -38,6 +51,7 @@ npm run dev
 ## Scripts
 
 ### Backend
+- `python manage.py runserver` - Inicia el servidor en modo producción
 
 ### Frontend
 - `npm run dev` - Inicia el servidor de desarrollo
