@@ -6,20 +6,11 @@ El proyecto está organizado en dos directorios principales:
 
 ### Backend
 Carpeta del backend con Django
-Backend/
-│
-├── api/                  # Aplicación principal (modelos, vistas, endpoints)
-│
-├── backend/              # Configuración principal del proyecto Django
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-│
-├── manage.py             # Archivo para ejecutar comandos Django
-├── requirements.txt      # Dependencias del proyecto
-└── README.md             # Documentación del backend
+-`api/`                 # Aplicación principal (modelos, vistas, endpoints)
+-`backend/`              # Configuración principal del proyecto Django
+-`manage.py`             # Archivo para ejecutar comandos Django
+-`requirements.txt`      # Dependencias del proyecto
+-`README.md`             # Documentación del backend
 INSTALAR:
 pip install django
 pip install django-rest-framework
