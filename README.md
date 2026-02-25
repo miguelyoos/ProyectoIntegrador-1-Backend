@@ -22,11 +22,10 @@ Carpeta del frontend con React + TypeScript + Vite:
 
 ## Instalación y Ejecución
 
+# Para usos de desarrollo inicial, es necesario activar una BD de postgres local en el equipo a correr y cambiar los datos de conexion en el archivo settings.py, en el apartado DATABASES
+
 ### Backend
 ```bash
-cd backend
-npm install
-npm run dev
 ```
 
 ### Frontend
@@ -39,8 +38,6 @@ npm run dev
 ## Scripts
 
 ### Backend
-- `npm run dev` - Inicia el servidor en modo desarrollo con watch
-- `npm start` - Inicia el servidor en modo producción
 
 ### Frontend
 - `npm run dev` - Inicia el servidor de desarrollo
