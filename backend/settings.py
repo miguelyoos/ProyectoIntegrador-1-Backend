@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'proyecto-integrador-1-backend.vercel.app',
-    'https://proyectointegrador-1-backend.onrender.com'
+    'proyectointegrador-1-backend.onrender.com'
 ]
 
 
