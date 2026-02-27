@@ -7,4 +7,4 @@ from rest_framework.response import Response
 
 @api_view(['GET'])
 def test_api(request):
-    return Response({"mensaje": "Conexión exitosa "})
+    return Response({"mensaje": "Conexión exitosa con la base de datos "})
