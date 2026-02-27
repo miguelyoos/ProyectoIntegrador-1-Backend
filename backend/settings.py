@@ -29,7 +29,12 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'proyecto-integrador-1-backend.vercel.app',
+    'https://proyectointegrador-1-backend.onrender.com'
+]
 
 
 # Application definition
