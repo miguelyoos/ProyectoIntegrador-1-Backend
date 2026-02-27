@@ -57,7 +57,11 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://proyecto-integrador-1-frontend.vercel.app"
+
+]
 
 ROOT_URLCONF = 'backend.urls'
 
