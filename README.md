@@ -6,12 +6,16 @@ El proyecto está organizado en dos directorios principales:
 
 ### Backend
 Carpeta del backend con Django
-- `src/` - Código fuente del backend
-  - `config/` - Archivos de configuración
-  - `controllers/` - Controladores
-  - `middleware/` - Middleware
-  - `models/` - Modelos de datos
-  - `routes/` - Rutas
+-`api/`                 # Aplicación principal (modelos, vistas, endpoints)
+-`backend/`              # Configuración principal del proyecto Django
+-`manage.py`             # Archivo para ejecutar comandos Django
+-`requirements.txt`      # Dependencias del proyecto
+-`README.md`             # Documentación del backend
+INSTALAR:
+pip install django
+pip install django-rest-framework
+pip install psycopg2
+pip install django-cors-headers
 
 ### Frontend
 Carpeta del frontend con React + TypeScript + Vite:
@@ -24,9 +28,8 @@ Carpeta del frontend con React + TypeScript + Vite:
 
 ### Backend
 ```bash
-cd backend
-npm install
-npm run dev
+cd Backend
+python manage.py runserver
 ```
 
 ### Frontend
@@ -39,8 +42,7 @@ npm run dev
 ## Scripts
 
 ### Backend
-- `npm run dev` - Inicia el servidor en modo desarrollo con watch
-- `npm start` - Inicia el servidor en modo producción
+- `python manage.py runserver` - Inicia el servidor en modo producción
 
 ### Frontend
 - `npm run dev` - Inicia el servidor de desarrollo
