@@ -7,4 +7,4 @@ from rest_framework.response import Response
 
 @api_view(['GET'])
 def test_api(request):
-    return JsonResponse({"status": "ok", "message": "Conectado a Render y Supabase"})
+    return JsonResponse({"status": "ok", "mensaje": "Conectado a Render y Supabase"})
