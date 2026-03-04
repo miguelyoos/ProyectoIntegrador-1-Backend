@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 from django.conf import settings
 
-from Backend.backend import settings
 
 
 class Actividad(models.Model):
