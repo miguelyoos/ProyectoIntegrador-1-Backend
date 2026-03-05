@@ -44,23 +44,52 @@ class SubtareaSerializer(serializers.ModelSerializer):
 # =========================
 class ActividadSerializer(serializers.ModelSerializer):
     subtareas = SubtareaSerializer(many=True, read_only=True)
+    horas_est = serializers.FloatField(required=False)
+    horas_comp = serializers.FloatField(required=False)
 
     class Meta:
         model = Actividad
         fields = '__all__'
         read_only_fields = ['usuario']
 
+    def to_internal_value(self, data):
+        # Convertir camelCase a snake_case para compatibilidad con frontend
+        if 'horasEst' in data:
+            data['horas_est'] = data.pop('horasEst')
+        if 'horasComp' in data:
+            data['horas_comp'] = data.pop('horasComp')
+        
+        # Normalizar valores de estado para compatibilidad con frontend
+        if 'estado' in data:
+            estado_map = {
+                'progreso': 'en_progreso',
+                'en progreso': 'en_progreso',
+                'completado': 'completada',
+            }
+            data['estado'] = estado_map.get(data['estado'], data['estado'])
+        
+        return super().to_internal_value(data)
+    
+    def to_representation(self, instance):
+        # Convertir snake_case a camelCase en la respuesta
+        data = super().to_representation(instance)
+        data['horasEst'] = data.pop('horas_est')
+        data['horasComp'] = data.pop('horas_comp')
+        return data
+
     def validate(self, data):
         errores = {}
 
-        if not data.get("titulo"):
-            errores["titulo"] = "El título es obligatorio."
+        # Solo validar campos obligatorios si no es una actualización parcial
+        if not self.partial:
+            if not data.get("titulo"):
+                errores["titulo"] = "El título es obligatorio."
 
-        if not data.get("tipo"):
-            errores["tipo"] = "El tipo es obligatorio."
+            if not data.get("tipo"):
+                errores["tipo"] = "El tipo es obligatorio."
 
-        if not data.get("materia"):
-            errores["materia"] = "La materia es obligatoria."
+            if not data.get("materia"):
+                errores["materia"] = "La materia es obligatoria."
 
         if errores:
             raise serializers.ValidationError(errores)
