@@ -14,8 +14,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import EmailTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import EmailTokenObtainPairSerializer
 
 class ActividadViewSet(viewsets.ModelViewSet):
+
     queryset = Actividad.objects.all()
     serializer_class = ActividadSerializer
     permission_classes = [IsAuthenticated]
@@ -69,3 +74,9 @@ class LogoutView(APIView):
                 {"error": "Token inválido"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+
+
+class EmailLoginView(TokenObtainPairView):
+    serializer_class = EmailTokenObtainPairSerializer

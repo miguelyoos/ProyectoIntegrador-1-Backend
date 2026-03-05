@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from .models import Actividad, Subtarea
-
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+User = get_user_model()
 
 # =========================
 # US-01 — Crear Actividad
@@ -54,5 +60,27 @@ class SubtareaSerializer(serializers.ModelSerializer):
 
         if errores:
             raise serializers.ValidationError(errores)
+
+        return data
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    email = serializers.EmailField(required=True)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Credenciales incorrectas")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Credenciales incorrectas")
+
+        # Aquí usamos el username REAL que ya existe en tu BD
+        data = super().validate({
+            "username": user.username,
+            "password": password
+        })
 
         return data
