@@ -63,6 +63,7 @@ class Subtarea(models.Model):
     nombre = models.CharField(max_length=255)
     fecha_entrega = models.DateField()
     horas_estimadas = models.DecimalField(max_digits=5, decimal_places=2)
+    done = models.BooleanField(default=False)
 
     class Meta:
         indexes = [

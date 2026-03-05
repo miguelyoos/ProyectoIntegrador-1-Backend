@@ -30,6 +30,7 @@ class ActividadViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+        
 class SubtareaViewSet(viewsets.ModelViewSet):
     queryset = Subtarea.objects.all()
     serializer_class = SubtareaSerializer
