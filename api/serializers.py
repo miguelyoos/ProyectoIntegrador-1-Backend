@@ -6,7 +6,9 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
+
 
 # =========================
 # US-01 — Crear Actividad
@@ -62,8 +64,9 @@ class SubtareaSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errores)
 
         return data
-class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
-    email = serializers.EmailField(required=True)
+class EmailTokenObtainPairSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         email = attrs.get("email")
@@ -77,10 +80,9 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.check_password(password):
             raise serializers.ValidationError("Credenciales incorrectas")
 
-        # Aquí usamos el username REAL que ya existe en tu BD
-        data = super().validate({
-            "username": user.username,
-            "password": password
-        })
+        refresh = RefreshToken.for_user(user)
 
-        return data
+        return {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
