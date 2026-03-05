@@ -68,7 +68,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://proyecto-integrador-1-frontend.vercel.app"
+    "https://proyecto-integrador-1-frontend.vercel.app",
+    "localhost"
 
 ]
 ROOT_URLCONF = 'backend.urls'
