@@ -22,16 +22,19 @@ class SubtareaSerializer(serializers.ModelSerializer):
     def validate(self, data):
         errores = {}
 
-        if not data.get("nombre"):
-            errores["nombre"] = "El nombre es obligatorio."
+        # SOLO validar en creación o PUT
+        if not self.partial:
 
-        horas = data.get("horas_estimadas")
+            if not data.get("nombre"):
+                errores["nombre"] = "El nombre es obligatorio."
 
-        if horas is None or horas <= 0:
-            errores["horas_estimadas"] = "Las horas estimadas deben ser mayores a 0."
+            horas = data.get("horas_estimadas")
 
-        if not data.get("fecha_entrega"):
-            errores["fecha_entrega"] = "La fecha de entrega es obligatoria."
+            if horas is None or horas <= 0:
+                errores["horas_estimadas"] = "Las horas estimadas deben ser mayores a 0."
+
+            if not data.get("fecha_entrega"):
+                errores["fecha_entrega"] = "La fecha de entrega es obligatoria."
 
         if errores:
             raise serializers.ValidationError(errores)
