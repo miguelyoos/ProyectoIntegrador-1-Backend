@@ -11,33 +11,6 @@ User = get_user_model()
 
 
 # =========================
-# US-01 — Crear Actividad
-# =========================
-class ActividadSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Actividad
-        fields = '__all__'
-
-    def validate(self, data):
-        errores = {}
-
-        if not data.get("titulo"):
-            errores["titulo"] = "El título es obligatorio."
-
-        if not data.get("tipo"):
-            errores["tipo"] = "El tipo es obligatorio."
-
-        if not data.get("materia"):
-            errores["materia"] = "La materia es obligatoria."
-
-        if errores:
-            raise serializers.ValidationError(errores)
-
-        return data
-
-
-# =========================
 # US-02 — Crear Subtarea
 # =========================
 class SubtareaSerializer(serializers.ModelSerializer):
@@ -59,6 +32,35 @@ class SubtareaSerializer(serializers.ModelSerializer):
 
         if not data.get("fecha_entrega"):
             errores["fecha_entrega"] = "La fecha de entrega es obligatoria."
+
+        if errores:
+            raise serializers.ValidationError(errores)
+
+        return data
+
+
+# =========================
+# US-01 — Crear Actividad
+# =========================
+class ActividadSerializer(serializers.ModelSerializer):
+    subtareas = SubtareaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Actividad
+        fields = '__all__'
+        read_only_fields = ['usuario']
+
+    def validate(self, data):
+        errores = {}
+
+        if not data.get("titulo"):
+            errores["titulo"] = "El título es obligatorio."
+
+        if not data.get("tipo"):
+            errores["tipo"] = "El tipo es obligatorio."
+
+        if not data.get("materia"):
+            errores["materia"] = "La materia es obligatoria."
 
         if errores:
             raise serializers.ValidationError(errores)

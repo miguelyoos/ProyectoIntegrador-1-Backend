@@ -20,32 +20,43 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import EmailTokenObtainPairSerializer
 
 class ActividadViewSet(viewsets.ModelViewSet):
-
     queryset = Actividad.objects.all()
     serializer_class = ActividadSerializer
     permission_classes = [IsAuthenticated]
+    
     def get_queryset(self):
-        return self.queryset.filter(usuario=self.request.user)
+        # Optimización: cargar subtareas en una sola consulta
+        return self.queryset.filter(usuario=self.request.user).prefetch_related('subtareas')
+    
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 class SubtareaViewSet(viewsets.ModelViewSet):
     queryset = Subtarea.objects.all()
     serializer_class = SubtareaSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        # Optimización: filtrar por usuario y cargar actividad en una consulta
+        return self.queryset.filter(actividad__usuario=self.request.user).select_related('actividad')
 
 @api_view(['GET'])
 def vista_hoy(request):
     hoy = timezone.now().date()
+    
+    # Optimización: filtrar por usuario y cargar actividad en una consulta
+    base_query = Subtarea.objects.filter(
+        actividad__usuario=request.user
+    ).select_related('actividad')
 
-    vencidas = Subtarea.objects.filter(
+    vencidas = base_query.filter(
         fecha_entrega__lt=hoy
     ).order_by('fecha_entrega', 'horas_estimadas')
 
-    para_hoy = Subtarea.objects.filter(
+    para_hoy = base_query.filter(
         fecha_entrega=hoy
     ).order_by('horas_estimadas')
 
-    proximas = Subtarea.objects.filter(
+    proximas = base_query.filter(
         fecha_entrega__gt=hoy
     ).order_by('fecha_entrega', 'horas_estimadas')
 

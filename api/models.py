@@ -44,6 +44,12 @@ class Actividad(models.Model):
     horas_comp     = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     estado         = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['usuario', 'fecha']),
+            models.Index(fields=['usuario', 'estado']),
+        ]
+
     def __str__(self):
         return self.titulo
     
@@ -58,7 +64,11 @@ class Subtarea(models.Model):
     fecha_entrega = models.DateField()
     horas_estimadas = models.DecimalField(max_digits=5, decimal_places=2)
 
-
+    class Meta:
+        indexes = [
+            models.Index(fields=['actividad', 'fecha_entrega']),
+            models.Index(fields=['fecha_entrega']),
+        ]
 
     def __str__(self):
         return self.nombre
