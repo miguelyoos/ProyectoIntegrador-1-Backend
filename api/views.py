@@ -63,7 +63,7 @@ class LogoutView(APIView):
         try:
             refresh_token = request.data["refresh"]
             token = RefreshToken(refresh_token)
-            token.blacklist()  # 🔥 lo invalida
+            token.blacklist() 
 
             return Response(
                 {"detail": "Sesión cerrada correctamente"},

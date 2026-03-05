@@ -8,36 +8,45 @@ from django.utils import timezone
 
 class Actividad(models.Model):
     usuario = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.CASCADE,
-    related_name='actividades'
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='actividades'
     )
-    TIPO_CHOICES = [
-        ('examen', 'Examen'),
-        ('quiz', 'Quiz'),
-        ('taller', 'Taller'),
-        ('proyecto', 'Proyecto'),
-        ('otro', 'Otro'),
-        ('tarea', 'Tarea'),
-    ]
-    prioridad_choices = [
-        ('baja', 'Baja'),
-        ('media', 'Media'),
-        ('alta', 'Alta'),
-        ('urgente', 'Urgente'),
-    ]
-        
-    titulo = models.CharField(max_length=255)
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    materia = models.CharField(max_length=255)
-    descripcion = models.TextField(blank=True)
-    prioridad = models.CharField(max_length=10, choices=prioridad_choices, default='media')
-    fecha_entrega = models.DateTimeField(null=True, blank=True)
-    horas_estimadas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
+    TIPO_CHOICES = [
+        ('Tarea', 'Tarea'),
+        ('Examen', 'Examen'),
+        ('Taller', 'Taller'),
+        ('Proyecto', 'Proyecto'),
+        ('Quiz', 'Quiz'),
+    ]
+
+    PRIORIDAD_CHOICES = [
+        ('Baja', 'Baja'),
+        ('Media', 'Media'),
+        ('Alta', 'Alta'),
+        ('Urgente', 'Urgente'),
+    ]
+
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('en_progreso', 'En progreso'),
+        ('completada', 'Completada'),
+    ]
+
+    titulo         = models.CharField(max_length=255)
+    tipo           = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    materia        = models.CharField(max_length=255)
+    desc           = models.TextField(blank=True)
+    prioridad      = models.CharField(max_length=10, choices=PRIORIDAD_CHOICES, default='Media')
+    fecha          = models.DateField(null=True, blank=True)
+    horas_est      = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    horas_comp     = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    estado         = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
 
     def __str__(self):
         return self.titulo
+    
 class Subtarea(models.Model):
     actividad = models.ForeignKey(
         Actividad,
@@ -54,19 +63,3 @@ class Subtarea(models.Model):
     def __str__(self):
         return self.nombre
 
-# class Usuario(AbstractBaseUser, PermissionsMixin):
-#     email = models.EmailField(unique=True)
-#     nombre = models.CharField(max_length=100)
-
-#     is_active = models.BooleanField(default=True)
-#     is_staff = models.BooleanField(default=False)
-
-#     date_joined = models.DateTimeField(default=timezone.now)
-
-#     objects = UsuarioManager()
-
-#     USERNAME_FIELD = 'email'
-#     REQUIRED_FIELDS = ['nombre']
-
-#     def __str__(self):
-#         return self.email
