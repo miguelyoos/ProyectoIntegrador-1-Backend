@@ -67,6 +67,9 @@ MIDDLEWARE = [
     
 ]
 
+# Permitir URLs sin slash al final para compatibilidad con frontend
+APPEND_SLASH = False
+
 CORS_ALLOWED_ORIGINS = [
     "https://proyecto-integrador-1-frontend.vercel.app",
     "http://localhost:5173"
