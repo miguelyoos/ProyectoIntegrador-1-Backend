@@ -1,12 +1,13 @@
 from rest_framework.response import Response
 from django.utils import timezone
 from rest_framework import viewsets, status
-from .models import Actividad, Subtarea
+from .models import Actividad, Subtarea, UserProfile
 from .serializers import (
     ActividadSerializer,
     SubtareaSerializer,
     EmailTokenObtainPairSerializer,
     RegisterSerializer,
+    UserProfileSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
@@ -141,3 +142,36 @@ class RegisterView(APIView):
 
 class EmailLoginView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Obtener el perfil del usuario actual con su límite diario"""
+        try:
+            profile = request.user.profile
+        except UserProfile.DoesNotExist:
+            profile = UserProfile.objects.create(usuario=request.user)
+        
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        """Actualizar el límite diario del usuario"""
+        try:
+            profile = request.user.profile
+        except UserProfile.DoesNotExist:
+            profile = UserProfile.objects.create(usuario=request.user)
+        
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {
+                    "detail": "Límite diario actualizado correctamente",
+                    "profile": serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

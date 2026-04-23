@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 
@@ -73,4 +74,43 @@ class Subtarea(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+class UserProfile(models.Model):
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
+    limite_diario_horas = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=6.00,
+        help_text="Límite de horas estimadas por día (1-16 horas)",
+        validators=[
+            MinValueValidator(1, message="El límite debe ser al menos 1 hora"),
+            MaxValueValidator(16, message="El límite no puede exceder 16 horas")
+        ]
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Perfil de Usuario"
+        verbose_name_plural = "Perfiles de Usuario"
+
+    def __str__(self):
+        return f"Perfil de {self.usuario.email}"
+
+    def actualizar_limite(self, nuevas_horas):
+        """Actualizar el límite diario de horas (1-16)"""
+        from decimal import Decimal
+        nuevas_horas = Decimal(str(nuevas_horas))
+        if nuevas_horas < 1:
+            raise ValueError("El límite debe ser al menos 1 hora")
+        if nuevas_horas > 16:
+            raise ValueError("El límite no puede exceder 16 horas")
+        self.limite_diario_horas = nuevas_horas
+        self.save()
+        return self
 

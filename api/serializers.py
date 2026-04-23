@@ -1,8 +1,11 @@
 from rest_framework import serializers
-from .models import Actividad, Subtarea
+from .models import Actividad, Subtarea, UserProfile
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Sum
+from decimal import Decimal
+
 User = get_user_model()
 
 
@@ -18,9 +21,8 @@ class SubtareaSerializer(serializers.ModelSerializer):
     def validate(self, data):
         errores = {}
 
-        # SOLO validar en creación o PUT
+        # Validar campos obligatorios solo en creación (POST)
         if not self.partial:
-
             if not data.get("nombre"):
                 errores["nombre"] = "El nombre es obligatorio."
 
@@ -31,6 +33,56 @@ class SubtareaSerializer(serializers.ModelSerializer):
 
             if not data.get("fecha_entrega"):
                 errores["fecha_entrega"] = "La fecha de entrega es obligatoria."
+
+        # Validar límite diario (tanto en creación como en actualización)
+        # Si es PATCH, usar valores del instance si no se proporcionan
+        horas = data.get("horas_estimadas")
+        fecha_entrega = data.get("fecha_entrega")
+        
+        if self.instance and self.partial:
+            # En PATCH, usar valores existentes si no se proporcionan
+            if horas is None:
+                horas = self.instance.horas_estimadas
+            if fecha_entrega is None:
+                fecha_entrega = self.instance.fecha_entrega
+        
+        # Obtener actividad (en PATCH viene de instance)
+        actividad = data.get("actividad")
+        if self.instance and not actividad:
+            actividad = self.instance.actividad
+        
+        if actividad and fecha_entrega and horas:
+            usuario = actividad.usuario
+            try:
+                limite = usuario.profile.limite_diario_horas
+            except:
+                limite = Decimal('6.00')
+            
+            # Calcular total de horas en esa fecha (excluyendo esta subtarea si es actualización)
+            otras_subtareas = Subtarea.objects.filter(
+                actividad__usuario=usuario,
+                fecha_entrega=fecha_entrega
+            )
+            
+            if self.instance:
+                otras_subtareas = otras_subtareas.exclude(id=self.instance.id)
+            
+            total_otras_horas = otras_subtareas.aggregate(
+                total=Sum('horas_estimadas')
+            )['total'] or Decimal('0')
+            
+            total_horas = total_otras_horas + Decimal(str(horas))
+            
+            if total_horas > limite:
+                errores["horas_estimadas"] = (
+                    f"Las horas totales para {fecha_entrega} "
+                    f"({total_horas}h) excederían el límite diario de {limite}h. "
+                    f"Otras tareas ese día: {total_otras_horas}h"
+                )
+        
+        # Validar que horas_estimadas sea mayor a 0
+        if horas is not None and horas <= 0:
+            errores["horas_estimadas"] = "Las horas estimadas deben ser mayores a 0."
 
         if errores:
             raise serializers.ValidationError(errores)
@@ -90,6 +142,52 @@ class ActividadSerializer(serializers.ModelSerializer):
             if not data.get("materia"):
                 errores["materia"] = "La materia es obligatoria."
 
+        # Validar límite diario si se proporciona una fecha y horas estimadas
+        if data.get("fecha") and data.get("horas_est"):
+            usuario = self.context.get('request').user if self.context.get('request') else None
+            
+            if usuario:
+                try:
+                    limite = usuario.profile.limite_diario_horas
+                except:
+                    limite = Decimal('6.00')
+                
+                fecha = data.get("fecha")
+                horas = Decimal(str(data.get("horas_est")))
+                
+                # Calcular total de horas en esa fecha (excluyendo esta actividad si es actualización)
+                otras_actividades = Actividad.objects.filter(
+                    usuario=usuario,
+                    fecha=fecha
+                )
+                
+                # Incluir también subtareas de otras actividades
+                otras_subtareas = Subtarea.objects.filter(
+                    actividad__usuario=usuario,
+                    fecha_entrega=fecha
+                )
+                
+                if self.instance:
+                    otras_actividades = otras_actividades.exclude(id=self.instance.id)
+                
+                total_otras_actividades = otras_actividades.aggregate(
+                    total=Sum('horas_est')
+                )['total'] or Decimal('0')
+                
+                total_subtareas = otras_subtareas.aggregate(
+                    total=Sum('horas_estimadas')
+                )['total'] or Decimal('0')
+                
+                total_horas = horas + total_otras_actividades + total_subtareas
+                
+                if total_horas > limite:
+                    errores["horas_est"] = (
+                        f"Las horas totales para {fecha} "
+                        f"({total_horas}h) excederían el límite diario de {limite}h. "
+                        f"Otras actividades: {total_otras_actividades}h, "
+                        f"Subtareas: {total_subtareas}h"
+                    )
+
         if errores:
             raise serializers.ValidationError(errores)
 
@@ -128,6 +226,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             validated_data['username'] = candidate
 
         user = User.objects.create_user(password=password, **validated_data)
+        
+        # Crear automáticamente el UserProfile
+        UserProfile.objects.get_or_create(usuario=user)
+        
         return user
 
 
@@ -166,3 +268,20 @@ class EmailTokenObtainPairSerializer(serializers.Serializer):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }
+
+
+# =========================
+# Usuario Profile - Límite Diario
+# =========================
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'usuario', 'limite_diario_horas', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'usuario', 'created_at', 'updated_at']
+
+    def validate_limite_diario_horas(self, value):
+        if value < 1:
+            raise serializers.ValidationError("El límite diario debe ser al menos 1 hora.")
+        if value > 16:
+            raise serializers.ValidationError("El límite diario no puede exceder 16 horas.")
+        return value
