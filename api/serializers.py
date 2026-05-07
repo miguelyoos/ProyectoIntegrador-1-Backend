@@ -97,11 +97,28 @@ class ActividadSerializer(serializers.ModelSerializer):
     subtareas = SubtareaSerializer(many=True, read_only=True)
     horas_est = serializers.FloatField(required=False)
     horas_comp = serializers.FloatField(required=False)
+    progreso = serializers.SerializerMethodField()
 
     class Meta:
         model = Actividad
         fields = '__all__'
         read_only_fields = ['usuario']
+    
+    def get_progreso(self, obj):
+        """
+        Calcula el porcentaje de avance de la actividad.
+        Si tiene subtareas: (subtareas_completadas / total_subtareas) * 100
+        Si no tiene subtareas: 100 si está "Hecha" o 0 si no lo está.
+        """
+        subtareas = obj.subtareas.all()
+        
+        if subtareas.exists():
+            total = subtareas.count()
+            completadas = subtareas.filter(done=True).count()
+            return round((completadas / total) * 100, 2)
+        else:
+            # Sin subtareas: 100 si está "hecho", 0 en caso contrario
+            return 100 if obj.estado == 'hecho' else 0
 
     def to_internal_value(self, data):
         # Convertir camelCase a snake_case para compatibilidad con frontend
@@ -115,7 +132,8 @@ class ActividadSerializer(serializers.ModelSerializer):
             estado_map = {
                 'progreso': 'en_progreso',
                 'en progreso': 'en_progreso',
-                'completado': 'completada',
+                'completado': 'hecho',
+                'completada': 'hecho',
             }
             data['estado'] = estado_map.get(data['estado'], data['estado'])
         

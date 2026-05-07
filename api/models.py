@@ -32,7 +32,8 @@ class Actividad(models.Model):
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
         ('en_progreso', 'En progreso'),
-        ('completada', 'Completada'),
+        ('hecho', 'Hecho'),
+        ('pospuesto', 'Pospuesto'),
     ]
 
     titulo         = models.CharField(max_length=255)
