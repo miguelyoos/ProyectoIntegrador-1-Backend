@@ -45,6 +45,7 @@ class Actividad(models.Model):
     horas_est      = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     horas_comp     = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     estado         = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    nota           = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, help_text="Nota obtenida en la actividad (0-10)")
 
     class Meta:
         indexes = [
