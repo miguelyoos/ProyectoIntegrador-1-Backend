@@ -57,6 +57,26 @@ La API usa SimpleJWT.
 
 ### Ejemplo login
 
+
+## Arquitectura
+
+- **api/**
+  - `models.py`: Definición de `Actividad`, `Subtarea` y extensiones de `Usuario`.
+  - `serializers.py`: Serializadores para cada modelo, incluyendo campos anidados y validaciones.
+  - `views.py`: ViewSets basados en `ModelViewSet` con permisos `IsAuthenticated` (excepto auth).
+  - `urls.py`: Registro de routers y rutas personalizadas (`/hoy/`, auth).
+- **backend/**
+  - Configuración Django estándar (`settings.py`, `urls.py`, `wsgi.py`).
+- **Autenticación JWT**
+  - Usa `djangorestframework-simplejwt`.
+  - Endpoints bajo `/api/` para registro, login, refresh y logout.
+  - Los views protegidos añaden automáticamente `request.user.id` a los filtros de consulta para aislar datos por usuario.
+- **Flujo de datos**
+  1. Cliente envía credenciales → obtiene `access` y `refresh` tokens.
+  2. Cada petición posterior incluye `Authorization: Bearer <access>`.
+  3. El middleware verifica el token y pobla `request.user`.
+  4. Los `ViewSet` filtran queryset por `request.user` para prevenir fugas de información.
+
 Request:
 
 ```json
