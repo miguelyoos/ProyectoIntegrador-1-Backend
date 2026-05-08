@@ -17,6 +17,13 @@ class SubtareaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subtarea
         fields = '__all__'
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Convertir horas_estimadas de Decimal a float
+        if 'horas_estimadas' in data:
+            data['horas_estimadas'] = float(data['horas_estimadas'])
+        return data
 
     def validate(self, data):
         errores = {}
@@ -151,8 +158,8 @@ class ActividadSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         # Convertir snake_case a camelCase en la respuesta
         data = super().to_representation(instance)
-        data['horasEst'] = data.pop('horas_est')
-        data['horasComp'] = data.pop('horas_comp')
+        data['horasEst'] = float(data.pop('horas_est')) if data.get('horas_est') is not None else 0
+        data['horasComp'] = float(data.pop('horas_comp')) if data.get('horas_comp') is not None else 0
         
         # Convertir estado del backend al formato del frontend
         estado_map = {
@@ -323,6 +330,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if value > 16:
             raise serializers.ValidationError("El límite diario no puede exceder 16 horas.")
         return value
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Convertir limite_diario_horas de Decimal a float para evitar problemas de formato
+        if 'limite_diario_horas' in data:
+            data['limite_diario_horas'] = float(data['limite_diario_horas'])
+        return data
 # =========================
 # Nota
 # =========================
