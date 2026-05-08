@@ -133,13 +133,18 @@ class ActividadSerializer(serializers.ModelSerializer):
         
         # Normalizar valores de estado para compatibilidad con frontend
         if 'estado' in data:
+            estado_str = str(data['estado']).lower().strip()
             estado_map = {
                 'progreso': 'en_progreso',
                 'en progreso': 'en_progreso',
+                'en_progreso': 'en_progreso',
                 'completado': 'hecho',
                 'completada': 'hecho',
+                'hecho': 'hecho',
+                'pendiente': 'pendiente',
+                'pospuesto': 'pospuesto',
             }
-            data['estado'] = estado_map.get(data['estado'], data['estado'])
+            data['estado'] = estado_map.get(estado_str, estado_str)
         
         return super().to_internal_value(data)
     
@@ -148,6 +153,17 @@ class ActividadSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['horasEst'] = data.pop('horas_est')
         data['horasComp'] = data.pop('horas_comp')
+        
+        # Convertir estado del backend al formato del frontend
+        estado_map = {
+            'en_progreso': 'progreso',
+            'hecho': 'completada',
+            'pendiente': 'pendiente',
+            'pospuesto': 'pospuesto',
+        }
+        if 'estado' in data:
+            data['estado'] = estado_map.get(data['estado'], data['estado'])
+        
         return data
 
     def validate(self, data):
