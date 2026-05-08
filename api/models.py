@@ -72,6 +72,7 @@ class Subtarea(models.Model):
         indexes = [
             models.Index(fields=['actividad', 'fecha_entrega']),
             models.Index(fields=['fecha_entrega']),
+            models.Index(fields=['fecha_entrega', 'done']),  # Optimización para consultas de vencidas/pendientes
         ]
 
     def __str__(self):

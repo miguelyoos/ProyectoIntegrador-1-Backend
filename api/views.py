@@ -60,16 +60,20 @@ class VistaHoyView(APIView):
         if estado:
             base_query = base_query.filter(actividad__estado=estado)
 
+        # Excluir subtareas completadas (done=True) de todos los contadores
         vencidas = base_query.filter(
-            fecha_entrega__lt=hoy
+            fecha_entrega__lt=hoy,
+            done=False
         ).order_by('fecha_entrega', 'horas_estimadas')
 
         para_hoy = base_query.filter(
-            fecha_entrega=hoy
+            fecha_entrega=hoy,
+            done=False
         ).order_by('horas_estimadas')
 
         proximas = base_query.filter(
-            fecha_entrega__gt=hoy
+            fecha_entrega__gt=hoy,
+            done=False
         ).order_by('fecha_entrega', 'horas_estimadas')
 
         if not vencidas.exists() and not para_hoy.exists() and not proximas.exists():
