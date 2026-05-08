@@ -3,10 +3,13 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
+from django.db import models
+from django.contrib.auth import get_user_model
+
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-
+User = get_user_model()
 class Actividad(models.Model):
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -116,3 +119,23 @@ class UserProfile(models.Model):
         self.save()
         return self
 
+# =========================
+# Nota
+# =========================
+class Nota(models.Model):
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    titulo = models.CharField(max_length=255)
+
+    contenido = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.titulo
