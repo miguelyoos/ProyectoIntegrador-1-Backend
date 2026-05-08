@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Actividad, Subtarea, UserProfile
+from .models import Actividad, Subtarea, UserProfile, Nota
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -303,3 +303,48 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if value > 16:
             raise serializers.ValidationError("El límite diario no puede exceder 16 horas.")
         return value
+# =========================
+# Nota
+# =========================
+class NotaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Nota
+        fields = '__all__'
+        read_only_fields = ['usuario']
+
+    def validate(self, data):
+
+        errores = {}
+
+        # Validaciones solo en creación
+        if not self.partial:
+
+            if not data.get("titulo"):
+                errores["titulo"] = "El título es obligatorio."
+
+            if not data.get("contenido"):
+                errores["contenido"] = "El contenido es obligatorio."
+
+        if errores:
+            raise serializers.ValidationError(errores)
+
+        return data
+
+    def to_internal_value(self, data):
+
+        # Compatibilidad camelCase frontend
+        if 'createdAt' in data:
+            data['created_at'] = data.pop('createdAt')
+
+        return super().to_internal_value(data)
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+
+        # Compatibilidad frontend
+        if 'created_at' in data:
+            data['createdAt'] = data.pop('created_at')
+
+        return data

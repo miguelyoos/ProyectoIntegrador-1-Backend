@@ -8,6 +8,7 @@ from .serializers import (
     EmailTokenObtainPairSerializer,
     RegisterSerializer,
     UserProfileSerializer,
+    NotaSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
@@ -179,3 +180,68 @@ class UserProfileView(APIView):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# =========================
+# Nota
+# =========================
+class NotaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+
+        try:
+            nota = Nota.objects.get(
+                id=id,
+                usuario=request.user
+            )
+
+        except Nota.DoesNotExist:
+            return Response(
+                {"error": "Nota no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = NotaSerializer(nota)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+
+    def patch(self, request, id):
+
+        try:
+            nota = Nota.objects.get(
+                id=id,
+                usuario=request.user
+            )
+
+        except Nota.DoesNotExist:
+            return Response(
+                {"error": "Nota no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = NotaSerializer(
+            nota,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                {
+                    "detail": "Nota actualizada correctamente",
+                    "nota": serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
