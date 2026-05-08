@@ -34,6 +34,10 @@ class SubtareaSerializer(serializers.ModelSerializer):
             if not data.get("fecha_entrega"):
                 errores["fecha_entrega"] = "La fecha de entrega es obligatoria."
 
+        # Si solo se está actualizando el campo 'done', no validar límite diario
+        if self.partial and len(data) == 1 and 'done' in data:
+            return data
+
         # Validar límite diario (tanto en creación como en actualización)
         # Si es PATCH, usar valores del instance si no se proporcionan
         horas = data.get("horas_estimadas")
@@ -80,7 +84,7 @@ class SubtareaSerializer(serializers.ModelSerializer):
                     f"Otras tareas ese día: {total_otras_horas}h"
                 )
         
-        # Validar que horas_estimadas sea mayor a 0
+        # Validar que horas_estimadas sea mayor a 0 (solo si se proporciona)
         if horas is not None and horas <= 0:
             errores["horas_estimadas"] = "Las horas estimadas deben ser mayores a 0."
 
